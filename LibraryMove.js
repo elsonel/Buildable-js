@@ -87,10 +87,11 @@ const Library = function (id) {
 
       moduleElement.style.top = module.yPos;
       moduleElement.style.left = module.xPos;
-      moduleElement.style.width = module.width;
-      moduleElement.style.height = module.height;
+      moduleElement.style.width = `${module.width}px`;
+      moduleElement.style.height = `${module.height}px`
 
       canvasElement.appendChild(moduleElement)
+      console.log("hi");
     });
   }
 
@@ -101,10 +102,10 @@ const Library = function (id) {
     const module = {};
     module.id = uuidv4();
 
-    module.xPos = 0;
-    module.yPos = 0;
-    module.width = "20%";
-    module.height = "20%";
+    module.xPos = 400;
+    module.yPos = 400;
+    module.width = 200;
+    module.height = 200;
 
     allModules.push(module); 
 
@@ -113,7 +114,19 @@ const Library = function (id) {
 
 }
 
-const l = new library("canvas");
+const l = new Library("canvas");
 l.createModule();
 l.createModule();
 l.createModule();
+l.createModule();
+
+        /*
+        moduleElement.addEventListener('mouseenter', () => {
+          console.log("entered");
+          moduleElement.style.cursor = 'ew-resize';
+        });
+        moduleElement.addEventListener('mouseleave', () => {
+          console.log("leave");
+          moduleElement.style.cursor = 'default';
+        });
+      }*/
