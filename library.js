@@ -12,10 +12,13 @@ const Library = function (id) {
   canvasElement.addEventListener("mouseup", onRelease);
   canvasElement.addEventListener('mouseleave', onRelease);
 
+  let cursor = "default";
   const allModules = {};
   let outerModules = [];
-  let activeModule = null;
+
   let hoverModule = null;
+  let activeModule = null;
+
   let hoverModules = [];
 
   let isMouseDown = false;
@@ -29,13 +32,11 @@ const Library = function (id) {
     startY = e.clientY;
 
     setActiveModule(hoverModule);
-
     render(outerModules);
   }
 
   function onMove (e) {
     hoverModules = getHoveredModules(e.clientX, e.clientY);
-    console.log(hoverModules.map(e => e.cursor));
 
     if (!activeModule) {
       hoverModules.forEach(module => {
@@ -52,9 +53,27 @@ const Library = function (id) {
         module.setCursor(x, y, width, height);
       });
 
-      if (hoverModules.at(-1)) hoverModule = hoverModules.at(-1);
-      else hoverModule = null;
-  
+      
+      let outerModule = null
+      if (hoverModules.length === 0) hoverModule = null;
+      else outerModule = getOuterModule(hoverModules[0]);   
+
+      for (let i = 0; i < hoverModules.length; i++) {
+        const module = hoverModules[i];
+
+        if (getOuterModule(module) != outerModule) break; //focus on one window
+
+        if (module.cursor === 'default') {
+          continue;
+        } else if (module.cursor !== 'default' && module.cursor !== 'move') {
+          hoverModule = module;
+          break;
+        } else if (module.cursor === 'move') {
+          hoverModule = module;
+          break;
+        }
+      }
+      
     } else {
       const deltaX = (e.clientX - startX);
       const deltaY = (e.clientY - startY);
@@ -69,16 +88,34 @@ const Library = function (id) {
   }
 
   function onRelease(e) {
+    // Snapping
+    /* TO DO: Snap depending on what you hover over, special icon, snap to anything...*/
+    let outerModule = null
+    if (hoverModules.length !== 0) outerModule = getOuterModule(hoverModules[0]);   
+
+    for (let i = 0; i < hoverModules.length; i++) {
+      const module = hoverModules[i];
+
+      if (getOuterModule(module) === outerModule) continue;
+
+      if (module.cursor !== 'default' && module.cursor !== 'move') {
+        activeModule.mount(module);
+        break;
+      }
+    }
+
     isMouseDown = false;
     setActiveModule(null);
+
+    render(outerModules);
   }
 
 
    /* Private Functions */
 
-  function getOuterModule(target) {
-    if (target.parentElement.id == canvasElement.id || target.id == canvasElement.id) return target;
-    else return getOuterModule(target.parentElement);
+  function getOuterModule(module) {
+    if (module.parent) return getOuterModule(module.parent);
+    else return module;
   }
 
   function getModuleByID(id) {
@@ -96,8 +133,10 @@ const Library = function (id) {
     activeModule = module;
     
     if (module != null) {
+      module = getOuterModule(module);
       outerModules = outerModules.filter((m) => m !== module);
       outerModules.unshift(module);
+      module.onStart();
     }
 
     render(outerModules);
@@ -118,7 +157,7 @@ const Library = function (id) {
       } else {
         moduleElement.style.position = 'static';
         moduleElement.style.width = '100%';
-        moduleElement.style.height = `${module.height * 0.5}px`;
+        moduleElement.style.height = `${module.height}px`;
 
         module.parent._attachedHTML.appendChild(moduleElement);
       }
@@ -129,44 +168,35 @@ const Library = function (id) {
     canvasElement.style.cursor = hoverModule ? hoverModule.cursor : "default";
   }
 
-
-  this.setChildToParent = function (childModule, parentModule) {
-    childModule.canMoveX = false;
-    childModule.canMoveY = false;    
-    childModule.canSize_N = false;
-    childModule.canSize_S = true;
-    childModule.canSize_W = false;
-    childModule.canSize_E = false;
-
-    childModule.parent = parentModule;
-    parentModule.children.push(childModule);
-
-    const index = outerModules.indexOf(childModule);
-    if (index > -1) outerModules.splice(index, 1);
-  }
-
    /* Public Functions */
 
+  this.addToGlobal = function(module) {
+    outerModules.unshift(module); //TODO find better way to organize this
+  }
+
   this.createModule = function () {   
-    const module = new Module();
+    const module = new Module(outerModules, this.addToGlobal);
     
     allModules[module.id] = module;
     outerModules.push(module); 
-
-    render(outerModules);
+    console.log(outerModules === module.root);
 
     return module;
   }
 
 }
 
-const Module = function() {
+const Module = function(root, addToGlobal) {
   this.id = uuidv4();
   this.cursor = 'default';
+  this.root = root;
 
   /* parent information */
   this.xPos = 400;
   this.yPos = 400;
+  this.xPosRest = this.xPos;
+  this.yPosRest = this.yPos;
+
   this.width = 200;
   this.height = 200;
 
@@ -187,8 +217,7 @@ const Module = function() {
     moduleElement.id = this.id;
    
     moduleElement.style.backgroundColor = Math.floor(Math.random()*16777215).toString(16);
-    
-    //moduleElement.innerHTML = this.id;
+    moduleElement.innerHTML = this.id;
 
     return moduleElement;
   })();
@@ -197,6 +226,7 @@ const Module = function() {
   this.children = [];
 
   this.addPos = function(xPos, yPos) {
+    this.onMove();
     if (this.canMoveX) this.xPos += xPos;
     if (this.canMoveY) this.yPos += yPos;
   }
@@ -264,26 +294,94 @@ const Module = function() {
   }
 
   this.setCursor = function(offsetX, offsetY, width, height) {
+    // Its actually not possible for the mouse position to be < 0 since the element will just not get detected
+
     const tol = 4;
 
-    if      (Math.abs(offsetX) < tol        && Math.abs(offsetY) < tol)         this.cursor = this.canSize_N && this.canSize_W ? 'nw-resize' : 'default';
-    else if (Math.abs(offsetX-width) < tol  && Math.abs(offsetY) < tol)         this.cursor = this.canSize_N && this.canSize_E ? 'ne-resize' : 'default'; 
-    else if (Math.abs(offsetX) < tol        && Math.abs(offsetY-height) < tol)  this.cursor = this.canSize_S && this.canSize_W ? 'sw-resize' : 'default'; 
-    else if (Math.abs(offsetX-width) < tol  && Math.abs(offsetY-height) < tol)  this.cursor = this.canSize_S && this.canSize_E ? 'se-resize' : 'default';
-    else if (Math.abs(offsetX) < tol)                                           this.cursor = this.canSize_W ? 'w-resize' : 'default';
-    else if (Math.abs(offsetX-width) < tol)                                     this.cursor = this.canSize_E ? 'e-resize' : 'default';
-    else if (Math.abs(offsetY) < tol)                                           this.cursor = this.canSize_N ? 'n-resize' : 'default';
-    else if (Math.abs(offsetY-height) < tol)                                    this.cursor = this.canSize_S ? 's-resize' : 'default';
+    if      (Math.abs(offsetX) < tol          && Math.abs(offsetY) < tol)         this.cursor = this.canSize_N && this.canSize_W ? 'nw-resize' : 'default';
+    else if (Math.abs(offsetX-width) < tol    && Math.abs(offsetY) < tol)         this.cursor = this.canSize_N && this.canSize_E ? 'ne-resize' : 'default'; 
+    else if (Math.abs(offsetX) < tol          && Math.abs(offsetY-height) < tol)  this.cursor = this.canSize_S && this.canSize_W ? 'sw-resize' : 'default'; 
+    else if (Math.abs(offsetX-width) < tol    && Math.abs(offsetY-height) < tol)  this.cursor = this.canSize_S && this.canSize_E ? 'se-resize' : 'default';
+    else if (Math.abs(offsetX) < tol)                                             this.cursor = this.canSize_W                   ? 'w-resize' : 'default';
+    else if (Math.abs(offsetX-width) < tol)                                       this.cursor = this.canSize_E                   ? 'e-resize' : 'default';
+    else if (Math.abs(offsetY) < tol)                                             this.cursor = this.canSize_N                   ? 'n-resize' : 'default';
+    else if (Math.abs(offsetY-height) < tol)                                      this.cursor = this.canSize_S                   ? 's-resize' : 'default';
     else if (offsetX >= tol && 
              offsetX <= width-tol && 
              offsetY >= tol && 
-             offsetY <= height-tol)                                             this.cursor = this.canMoveX || this.canMoveY ? 'move' : 'default';
-    else                                                                        this.cursor = 'default';
+             offsetY <= height-tol)                                               this.cursor = this.canMoveX || this.canMoveY   ? 'move' : 'default';
+    else                                                                          this.cursor = 'default';
+  }
+
+  this.onMove = function() {
+    if (!this.parent) return;
+    const dist = Math.hypot(this.xPosRest - this.xPos, this.yPosRest - this.yPos);
+    if (dist > 30) this.unMount();
+
+  }
+
+  this.onStart = function() {
+    this.xPosRest = this.xPos;
+    this.yPosRest = this.yPos;
+  }
+
+  /* Snap Functions */
+
+  this.addChild = function(module) {
+    this.children.unshift(module);
+    //this.children.push(module);
+  }
+
+  this.removeChild = function(module) {
+    const index = this.children.indexOf(module);
+    if (index > -1) this.children.splice(index, 1);
+  }
+
+  this.mount = function(parentModule) {
+    this.height = parentModule.height / 2;
+    
+    //this.canMoveX = false;
+    //this.canMoveY = false;    
+    this.xPosRest = this.xPos;
+    this.yPosRest = this.yPos;
+
+    this.canSize_N = false;
+    this.canSize_S = true;
+    this.canSize_W = false;
+    this.canSize_E = false;
+
+    this.parent = parentModule;
+    parentModule.addChild(this);
+
+    const index = root.indexOf(this);
+    if (index > -1) root.splice(index, 1);
+  }
+
+  this.unMount = function () {
+    const rect = this._attachedHTML.getBoundingClientRect();
+    this.xPos = rect.left + (this.xPos - this.xPosRest);
+    this.yPos = rect.top + (this.yPos - this.yPosRest);
+    this.width = this.parent.width;
+
+    this.canMoveX = true;
+    this.canMoveY = true;    
+    this.canSize_N = true;
+    this.canSize_S = true;
+    this.canSize_W = true;
+    this.canSize_E = true;
+    
+    this.parent.removeChild(this);
+    this.parent = null;
+
+    //root.unshift(this);
+    addToGlobal(this); //TODO why do I have to use a function here?
   }
 
 }
 
-const b = new Library("canvas");
-const mod1 = b.createModule();
-const mod2 = b.createModule();
-b.setChildToParent(mod1, mod2);
+const $ = new Library("canvas");
+const mod1 = $.createModule();
+const mod2 = $.createModule();
+mod1.mount(mod2);
+
+const mod3 = b.createModule();
