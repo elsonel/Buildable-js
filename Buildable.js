@@ -1,13 +1,12 @@
-const Buildable = function (id) {
-  const canvasElement = document.getElementById("canvas");
+const Buildable = function (rootId) {
+  const canvasElement = document.getElementById(rootId);
   canvasElement.addEventListener("mousedown", onPress);
   canvasElement.addEventListener("mousemove", onMove);
   canvasElement.addEventListener("mouseup", onRelease);
   canvasElement.addEventListener('mouseleave', onRelease);
 
-  let cursor = "default";
   const allModules = {};
-  let outerModules = [];
+  const globalModules = [];
 
   let hoverModule = null;
   let activeModule = null;
@@ -25,47 +24,19 @@ const Buildable = function (id) {
     startY = e.clientY;
 
     setActiveModule(hoverModule);
-    render(outerModules);
+    render(globalModules);
   }
 
   function onMove (e) {
     hoverModules = getHoveredModules(e.clientX, e.clientY);
 
     if (!activeModule) {
-      hoverModules.forEach(module => {
-        // https://htmldom.dev/calculate-the-mouse-position-relative-to-an-element/
-        // https://javascript.info/bubbling-and-capturing
-        // module.setCursor(e.offsetX, e.offsetY, e.target.clientWidth, e.target.clientHeight);
-  
-        const bounds = module._attachedHTML.getBoundingClientRect();
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-        const width = bounds.width;
-        const height = bounds.height;
-  
-        module.setCursor(x, y, width, height);
-      });
 
-      
-      let outerModule = null
-      if (hoverModules.length === 0) hoverModule = null;
-      else outerModule = getOuterModule(hoverModules[0]);   
+      // Figure out what action to perform at each layer for each hovered module
+      setModuleCursors(hoverModules, e.clientX, e.clientY);
 
-      for (let i = 0; i < hoverModules.length; i++) {
-        const module = hoverModules[i];
-
-        if (getOuterModule(module) != outerModule) break; //focus on one window
-
-        if (module.cursor === 'default') {
-          continue;
-        } else if (module.cursor !== 'default' && module.cursor !== 'move') {
-          hoverModule = module;
-          break;
-        } else if (module.cursor === 'move') {
-          hoverModule = module;
-          break;
-        }
-      }
+      // Determine the module to perform an action on 
+      hoverModule = getPriorityModule(hoverModules);
       
     } else {
       const deltaX = (e.clientX - startX);
@@ -73,111 +44,155 @@ const Buildable = function (id) {
       startX = e.clientX;
       startY = e.clientY;
 
-      if (activeModule.cursor == 'move') activeModule.addPos(deltaX, deltaY);
-      else activeModule.addSize(deltaX, deltaY);
+      if (activeModule._cursor === 'move')                           
+        activeModule.DRAG.addPos(activeModule, deltaX, deltaY);
+      else if (activeModule._cursor !== 'default' && activeModule._cursor !== 'move') 
+        activeModule.SIZE.addSize(activeModule, deltaX, deltaY);
     }
 
-    render(outerModules);
+    render(globalModules);
   }
 
-  function onRelease(e) {
-    // Snapping
-    /* TO DO: Snap depending on what you hover over, special icon, snap to anything...*/
-    let outerModule = null
-    if (hoverModules.length !== 0) outerModule = getOuterModule(hoverModules[0]);   
-
-    for (let i = 0; i < hoverModules.length; i++) {
-      const module = hoverModules[i];
-
-      if (getOuterModule(module) === outerModule) continue;
-
-      if (module.cursor !== 'default' && module.cursor !== 'move') {
-        activeModule.mount(module);
+  function onRelease(e) {    
+    const moduleArray = getForegroundModules(getBackgroundModules(hoverModules));
+    for (let i = 0; i < moduleArray.length; i++) {
+      const module = moduleArray[i];
+      
+      if (module._cursor === 'n-resize') {
+        activeModule.mount(module, module._children.length); 
+        break;
+      } else if (module._cursor === 's-resize') {
+        activeModule.mount(module, 0);
         break;
       }
     }
 
     isMouseDown = false;
     setActiveModule(null);
-
-    render(outerModules);
   }
 
+  /* Events */
 
-   /* Private Functions */
+  const setModuleCursors = (moduleArray, xPos, yPos) => {
+    // https://htmldom.dev/calculate-the-mouse-position-relative-to-an-element/
+    // https://javascript.info/bubbling-and-capturing
+    // module.setCursor(e.offsetX, e.offsetY, e.target.clientWidth, e.target.clientHeight);
 
-  function getOuterModule(module) {
-    if (module.parent) return getOuterModule(module.parent);
-    else return module;
+    moduleArray.forEach(module => {
+      const bounds = module._attachedHTML.getBoundingClientRect();
+      const x = xPos - bounds.left;
+      const y = yPos - bounds.top;
+      const width = bounds.width;
+      const height = bounds.height;
+
+      module.setCursor(x, y, width, height);
+    });
   }
 
-  function getModuleByID(id) {
-    return allModules[id];
-  }
-
-  function getHoveredModules(x, y) {
-    const hoverElements = document.elementsFromPoint(x, y);   
-    const hoverModuleElements = hoverElements.filter(e => getModuleByID(e.id));
-
-    return hoverModuleElements.map(e => getModuleByID(e.id));
-  }
-
-  function setActiveModule(module) {
+  const setActiveModule = (module) => {    
+    if (activeModule) activeModule.onDeactive();
     activeModule = module;
-    
-    if (module != null) {
-      module = getOuterModule(module);
-      outerModules = outerModules.filter((m) => m !== module);
-      outerModules.unshift(module);
-      module.onStart();
+
+    if (module) {
+      this.addToGlobal(getGlobalModule(module));
+      module.onActive();
     }
 
-    render(outerModules);
+    render(globalModules);
   }
 
-  function render(allModules) {    
-    [...allModules].reverse().forEach(module => {
-      let moduleElement = module._attachedHTML;
-    
-      if (!module.parent) {
+  const render = (moduleArray) => {    
+    [...moduleArray].reverse().forEach(module => {
+      const moduleElement = module._attachedHTML;
+
+      if (!module._parent) {
         moduleElement.style.position = 'absolute';
-        moduleElement.style.top = module.yPos;
-        moduleElement.style.left = module.xPos;
-        moduleElement.style.width = `${module.width}px`;
-        moduleElement.style.height = `${module.height}px`;
+        moduleElement.style.top = module._posY;
+        moduleElement.style.left = module._posX;
+        moduleElement.style.width = `${module._width}px`;
+        moduleElement.style.height = `${module._height}px`;
 
         canvasElement.appendChild(moduleElement);
       } else {
+
+        const parentElement = module._parent._attachedHTML;
+
         moduleElement.style.position = 'static';
         moduleElement.style.width = '100%';
-        moduleElement.style.height = `${module.height}px`;
+        moduleElement.style.height = `${module._height}px`;
 
-        module.parent._attachedHTML.appendChild(moduleElement);
+        parentElement.appendChild(moduleElement);
       }
       
-      render(module.children);
+      render(module._children);
     });
 
-    canvasElement.style.cursor = hoverModule ? hoverModule.cursor : "default";
+    canvasElement.style.cursor = hoverModule ? hoverModule._cursor : "default";
+  }
+
+  /* Utility */
+
+  const getPriorityModule = (moduleArray) => {
+    const culledModules = getForegroundModules(moduleArray);
+    for (let i = 0; i < culledModules.length; i++) {
+      const module = culledModules[i];
+
+      if      (module._cursor === 'default')                              continue;
+      else if (module._cursor !== 'default' && module._cursor !== 'move') return module;
+      else if (module._cursor === 'move')                                 return module;
+    }
+
+    return null;
+  }
+
+  const getGlobalModule = (module) => {
+    if (module._parent) return getGlobalModule(module._parent);
+    else return module;
+  }
+
+  const getModuleById = (id) => {
+    return allModules[id];
+  }
+
+  const getHoveredModules = (xPos, yPos) => {
+    const hoverElements = document.elementsFromPoint(xPos, yPos);   
+    const hoverModuleElements = hoverElements.filter(element => getModuleById(element.dataset.moduleId));
+
+    return hoverModuleElements.map(moduleElement => getModuleById(moduleElement.dataset.moduleId));
+  }
+
+  const getForegroundModules = (moduleArray) => {
+    if (moduleArray.length != 0) 
+      return moduleArray.filter(module => getGlobalModule(module) === getGlobalModule(moduleArray[0]));
+    else 
+      return [];
+  }
+
+  const getBackgroundModules = (moduleArray) => {
+    if (moduleArray.length != 0) 
+      return moduleArray.filter(module => getGlobalModule(module) !== getGlobalModule(moduleArray[0]));
+    else 
+      return [];
   }
 
    /* Public Functions */
 
-  this.addToGlobal = function(module) {
-    outerModules.unshift(module); //TODO find better way to organize this
+  this.removeFromGlobal = (module) => {
+    const index = globalModules.indexOf(module);
+    if (index > -1) globalModules.splice(index, 1);
   }
 
-  this.removeFromGlobal = function(module) {
-    const index = outerModules.indexOf(module);
-    if (index > -1) outerModules.splice(index, 1);
+  this.addToGlobal = (module) => {
+    if (module.parent) module.unmount();
+    this.removeFromGlobal(module);
+    globalModules.unshift(module);
   }
 
-  this.createModule = function () {   
+  this.createModule = () => {   
     const module = new Module(this.addToGlobal, this.removeFromGlobal);
     
-    allModules[module.id] = module;
-    outerModules.push(module); 
-    console.log(outerModules === module.root);
+    allModules[module._id] = module;
+    globalModules.push(module); 
 
     return module;
   }
