@@ -1,28 +1,31 @@
-const Module = function(addToGlobal, removeFromGlobal) {
+const Module = function(addToGlobal, removeFromGlobal, dragSettings, sizeSettings) {
   this._id = uuidv4();
   this._attachedHTML = (() => {
     const moduleElement = document.createElement('div');
     moduleElement.dataset.moduleId = this._id;
     moduleElement.style.boxSizing = "border-box";
 
-    moduleElement.className = "module";
-    moduleElement.style.backgroundColor = Math.floor(Math.random()*16777215).toString(16);
-    moduleElement.innerHTML = `<div>${this._id}<div>`;
+    //moduleElement.className = "module";
+    //moduleElement.style.backgroundColor = Math.floor(Math.random()*16777215).toString(16);
+    
+    //const newDiv = document.createElement("div");
+    //newDiv.innerHTML = this._id;
+    //moduleElement.appendChild(newDiv);
 
     return moduleElement;
   })();
 
   this._cursor = 'default';
-  this.DRAG = new ModuleDrag();
-  this.SIZE = new ModuleSize();
+  this.DRAG = dragSettings || new ModuleDrag();
+  this.SIZE = sizeSettings || new ModuleSize();
   
-  this._posX = 500;
-  this._posY = 500;
+  this._posX = this.DRAG.posX_Default;;
+  this._posY = this.DRAG.posY_Default;;
   this._posX_Rest = this._posX;
   this._posY_Rest = this._posY;
 
-  this._width = 200;
-  this._height = 200;
+  this._width = this.SIZE.width_Default;
+  this._height = this.SIZE.height_Default;
 
   this.setCursor = function(offsetX, offsetY, width, height) {
     // Its actually not possible for offsetX, offsetY to be < 0 since the mouse cannot be outside of an element and detect it
@@ -43,8 +46,26 @@ const Module = function(addToGlobal, removeFromGlobal) {
     else                                                                          this._cursor = 'default';
   }
 
+  this.getCursor = function(offsetX, offsetY, width, height) {
+    const tol = 10;
+
+    if (Math.abs(offsetX) < tol)                  return 'w-resize';
+    else if (Math.abs(offsetX-width) < tol)       return 'e-resize';
+    else if (Math.abs(offsetY) < tol)             return 'n-resize';
+    else if (Math.abs(offsetY-height) < tol)      return 's-resize';
+    else if (offsetX >= tol && 
+             offsetX <= width-tol && 
+             offsetY >= tol && 
+             offsetY <= height-tol)               return 'move';
+  }
+
   this._parent = null;
   this._children = [];
+
+  this.getOuterParent = function () {
+    if (this._parent) return this._parent.getOuterParent();
+    else return this;
+  }
 
   this.updateChildren = function () {
     // update the resize settings of child modules
@@ -54,34 +75,41 @@ const Module = function(addToGlobal, removeFromGlobal) {
 
     // prevent resizing on the last child
     if (this._children[0]) this._children[0].SIZE.canSize_S = false;
-  }
 
-  this.updateChildrenSize = function () {
+    // update height
     const totalHeight = this.getHeight();
     const availableHeight = totalHeight - this.getChildrenNonModuleHeight();
-    console.log(availableHeight);
-    this._children.forEach(childModule => childModule._height = availableHeight / this._children.length);
-  }
 
-  this.getAvailableDivisionSize = function() {
-    const totalHeight = this.getHeight();
-    const availableHeight = totalHeight - this.getChildrenNonModuleHeight();
-    
-    return availableHeight / this._children.length;
+    this._children.forEach(childModule => {
+      //const totalHeight = CSSgetSizeProperties(childModule._parent._attachedHTML).height;
+      //const availableHeight = totalHeight - childModule._parent.getChildrenNonModuleHeight();
+      const totalChildren = childModule._parent._children.length;
+
+      childModule._height = availableHeight / totalChildren;
+    });
+
+    // recursively update
+    this._children.forEach(childModule => childModule.updateChildren());
   }
 
   /* Snap Settings */
 
   this.addChild = function(module, index) {
-    // TODO the index should consider normal elements as well that are not modules
     this._children.splice(index, 0, module);
+    module._parent = this;
+
     this.updateChildren();
-    this.updateChildrenSize();
+    this.getOuterParent().SIZE.addSize(this.getOuterParent(), 1, 1);
   }
 
   this.removeChild = function(module) {
     const index = this._children.indexOf(module);
-    if (index > -1) this._children.splice(index, 1);
+    
+    if (index > -1) {
+      this._children.splice(index, 1);
+      module._parent = null;
+    }
+
     this.updateChildren();
   }
 
@@ -91,13 +119,9 @@ const Module = function(addToGlobal, removeFromGlobal) {
     this.SIZE.canSize_W = false;
     this.SIZE.canSize_E = false;
 
-    parentModule.addChild(this, index);
-    this._parent = parentModule;
+    parentModule.addChild(this, index); //ORDER!!!
 
     removeFromGlobal(this);
-
-    this._height = (parentModule.getHeight() - parentModule.getChildrenNonModuleHeight()) / parentModule._children.length;
-
   }
 
   this.unmount = () => {
@@ -112,19 +136,8 @@ const Module = function(addToGlobal, removeFromGlobal) {
     this.SIZE.canSize_E = true;
     
     this._parent.removeChild(this);
-    this._parent = null;
 
     addToGlobal(this);
-  }
-
-  this.onActive = function () {
-    this._posX_Rest = this._posX;
-    this._posY_Rest = this._posY;
-    //console.log("active");
-  }
-
-  this.onDeactive = function () {
-    //console.log("released");
   }
 
   /* Utility */
@@ -171,6 +184,9 @@ const Module = function(addToGlobal, removeFromGlobal) {
 }
 
 const ModuleDrag = function () {
+  this.posX_Default = 0;
+  this.posY_Default = 0;
+
   this.canMove = true;          
   this.canMoveX = true;
   this.canMoveY = true;
@@ -206,6 +222,11 @@ const ModuleDrag = function () {
     this.onMove(module);
   }
 
+  this.onMoveStart = function(module) {
+    module._posX_Rest = module._posX;
+    module._posY_Rest = module._posY;
+  }
+
   this.onMove = function(module) { 
     if (module._parent) {
       const dist = Math.hypot(module._posX_Rest - module._posX, module._posY_Rest - module._posY);
@@ -213,9 +234,17 @@ const ModuleDrag = function () {
     }
   }
 
+  this.onMoveEnd = function(module) {
+
+  }
+
 }
 
 const ModuleSize = function () {
+
+  this.width_Default = 500;
+  this.height_Default = 500;
+
   this.canSize = true;
   this.canSizeWidth = true;
   this.canSizeHeight = true;
@@ -225,8 +254,8 @@ const ModuleSize = function () {
   this.canSize_W = true;
   this.canSize_E = true;
 
-  this.boundWidth = [60, Infinity];
-  this.boundHeight = [60, Infinity];
+  this.boundWidth = [0, Infinity];
+  this.boundHeight = [0, Infinity];
 
 
   this.addSizeX = (module, direction, xDelta) => {
@@ -294,11 +323,7 @@ const ModuleSize = function () {
   }
 
   this.addSize = function(module, xDelta, yDelta) {
-
-    // Size Event Restrictions
-    if (!this.canSize)       xDelta = yDelta = 0;
-    if (!this.canSizeWidth)  xDelta = 0;
-    if (!this.canSizeHeight) yDelta = 0;
+    if (module._children.length > 0) module.updateChildren();
 
     switch(module._cursor) {
       case 'nw-resize':
@@ -330,6 +355,8 @@ const ModuleSize = function () {
         this.addSizeY(module, "s-resize", yDelta);
         break;
     }
+
+    module.updateChildren();
 
   }
 

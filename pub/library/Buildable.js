@@ -17,6 +17,9 @@ const Buildable = function (rootId) {
   let startX = 0;
   let startY = 0;
 
+  let snapModule = null;
+  let snapIndex = null;
+
   /* Event Callbacks */
   function onPress (e) {
     isMouseDown = true;
@@ -28,6 +31,7 @@ const Buildable = function (rootId) {
   }
 
   function onMove (e) {
+
     hoverModules = getHoveredModules(e.clientX, e.clientY);
 
     if (!activeModule) {
@@ -39,6 +43,7 @@ const Buildable = function (rootId) {
       hoverModule = getPriorityModule(hoverModules);
       
     } else {
+      // Process input events
       const deltaX = (e.clientX - startX);
       const deltaY = (e.clientY - startY);
       startX = e.clientX;
@@ -48,27 +53,79 @@ const Buildable = function (rootId) {
         activeModule.DRAG.addPos(activeModule, deltaX, deltaY);
       else if (activeModule._cursor !== 'default' && activeModule._cursor !== 'move') 
         activeModule.SIZE.addSize(activeModule, deltaX, deltaY);
+
+      // Highlight seperate windows
     }
+
+    highlight(e.clientX, e.clientY);
 
     render(globalModules);
   }
 
   function onRelease(e) {    
-    const moduleArray = getForegroundModules(getBackgroundModules(hoverModules));
-    for (let i = 0; i < moduleArray.length; i++) {
-      const module = moduleArray[i];
-      
-      if (module._cursor === 'n-resize') {
-        activeModule.mount(module, module._children.length); 
-        break;
-      } else if (module._cursor === 's-resize') {
-        activeModule.mount(module, 0);
-        break;
-      }
-    }
+    if (snapModule) {
+      snapModule._attachedHTML.style.borderLeft = null;
+      snapModule._attachedHTML.style.borderRight = null;
+      snapModule._attachedHTML.style.borderTop = null;
+      snapModule._attachedHTML.style.borderBottom = null;
+      activeModule.mount(snapModule, snapIndex);
+    } 
 
     isMouseDown = false;
     setActiveModule(null);
+  }
+
+  /* Experiments */
+
+  const highlight = (xPos, yPos) => {
+    const moduleArray = getForegroundModules(getBackgroundModules(hoverModules));
+
+    Object.values(allModules).forEach(module => {
+      module._attachedHTML.style.borderLeft = null;
+      module._attachedHTML.style.borderRight = null;
+      module._attachedHTML.style.borderTop = null;
+      module._attachedHTML.style.borderBottom = null;
+    });
+
+    snapModule = null;
+    snapIndex = null;
+
+    for (let i = 0; i < moduleArray.length; i++) {
+      const module = moduleArray[i];
+
+      const bounds = module._attachedHTML.getBoundingClientRect();
+      const x = xPos - bounds.left;
+      const y = yPos - bounds.top;
+      const width = bounds.width;
+      const height = bounds.height;
+
+      const cursor = module.getCursor(x, y, width, height)
+
+      switch(cursor) {
+        case 'w-resize':
+          //module._attachedHTML.style.borderLeft = "thick solid #FFFFFF";
+          break;
+        case 'e-resize':
+          //module._attachedHTML.style.borderRight = "thick solid #FFFFFF";
+          break;
+        case 'n-resize':
+          snapModule = module;
+          snapIndex = module._children.length;
+          module._attachedHTML.style.borderTop = "thick solid #FFFFFF";
+          break;
+        case 's-resize':
+          snapModule = module;
+          snapIndex = 0;
+          module._attachedHTML.style.borderBottom = "thick solid #FFFFFF";
+          break;  
+        default:
+          module._attachedHTML.style.borderLeft = null;
+          module._attachedHTML.style.borderRight = null;
+          module._attachedHTML.style.borderTop = null;
+          module._attachedHTML.style.borderBottom = null;
+      }
+    
+    }
   }
 
   /* Events */
@@ -90,12 +147,12 @@ const Buildable = function (rootId) {
   }
 
   const setActiveModule = (module) => {    
-    if (activeModule) activeModule.onDeactive();
+    if (activeModule) activeModule.DRAG.onMoveEnd(activeModule);
     activeModule = module;
 
     if (module) {
       this.addToGlobal(getGlobalModule(module));
-      module.onActive();
+      module.DRAG.onMoveStart(module);
     }
 
     render(globalModules);
@@ -188,8 +245,8 @@ const Buildable = function (rootId) {
     globalModules.unshift(module);
   }
 
-  this.createModule = () => {   
-    const module = new Module(this.addToGlobal, this.removeFromGlobal);
+  this.createModule = (dragSettings, sizeSettings) => {   
+    const module = new Module(this.addToGlobal, this.removeFromGlobal, dragSettings, sizeSettings);
     
     allModules[module._id] = module;
     globalModules.push(module); 
