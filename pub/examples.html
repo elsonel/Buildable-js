@@ -10,52 +10,22 @@
 			height: 100%;
 			width: 100%;
 		}
-		#canvastxt {
-			pointer-events: none;
-			font-size: 10px;
-			user-select: none;
-			color: white;
-			position: absolute;
-			top: 0;
-			left: 0;
-		}
-		#link {
-			position: fixed;
-			left: 0;
-			top: 100;
-			margin: 10px;
-			color: red;
-		}
 		.module {
 			user-select: none;
 			padding: 10px;
-			border: 4px solid red;
+			border: 5px solid red;
 			/*margin: 10px;*/
+			/*box-sizing: border-box;*/
 		}
 	</style>
 	<head>
-		<script src="/library/Buildable_Utility.js"></script>
-		<script src="/library/Buildable_Module.js"></script>
-		<script src="/library/Buildable.js"></script>
+		<script src="Buildable_Utility.js"></script>
+		<script src="Buildable_Module.js"></script>
+		<script src="Buildable_Manager.js"></script>
+		<script src="Buildable.js"></script>
 		<script defer src="example.js"></script>
 	</head>
 	<body>
 		<div id="canvas"></div>
-		<div id="canvastxt">
-
-			<ul>
-				<li>Every outer module can be dragged and resized in any way.</li>
-
-				<li>Dragging a parent module moves all its child modules.</li>
-				<li>Dragging a child module unmounts it.</li>
-				<li>Dragging a module over the top or bottom border of another module mounts it.</li>
-	
-				<li>Resizing a parent module resizes all child modules (buggy).</li>
-				<li>Resizing the height of a child module resizes its siblings.</li>
-	
-				<li>Currently, only vertical snapping is implemented.</li>
-			</ul>
-		</div>
-		<a id="link" href="/docs.html">Go to Documentation</a>
 	</body>
 </html>
