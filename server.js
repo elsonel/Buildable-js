@@ -1,37 +1,41 @@
-/* server.js - Express server*/
-'use strict';
-
 const express = require('express')
 const app = express();
 
 const path = require('path');
 
-// Setting up a static directory for the files in /pub
+//	Setting up a static directory for the files in /pub
+
 app.use(express.static(path.join(__dirname, '/pub')))
+
+
+// Routes
 
 app.get('/', function(req, res) {
     res.sendFile('/pub/examples.html', { root: __dirname });
 });
 
-/*
+app.get('/examples', function(req, res) {
+    res.sendFile('/pub/examples.html', { root: __dirname });
+});
 
-app.get('/', (req, res) => {
-	// sending a string
-	//res.send('This should be the root route!')
+app.get('/gettingstarted', function(req, res) {
+    res.sendFile('/pub/examples.html', { root: __dirname });
+});
 
-	//sending some HTML
-	res.send('<h1>This should be the root route!</h1>')
+app.get('/documentation', function(req, res) {
+    res.sendFile('/pub/docs/index.html', { root: __dirname });
+});
+
+//	Other Routes
+
+app.get('*', (req, res) => {
+    res.redirect('/');
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack)
+    res.status(500).send('Bad request?');
 })
-
-// Sending some JSON
-app.get('/someJSON', (req, res) => {
-	// object converted to JSON string
-	res.send({
-		name: 'John',
-		year: 3,
-		courses: ['csc309', 'csc301']
-	})
-})*/
 
 const port = process.env.PORT || 5000;
 

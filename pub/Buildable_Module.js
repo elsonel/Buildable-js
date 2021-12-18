@@ -107,16 +107,17 @@ const Module = function(manager) {
       moduleElement.style.width = ``;
       moduleElement.style.height = ``;
 
-      moduleElement.style.flexBasis = `50%`;//`${this.height}px`;
-      moduleElement.style.flexGrow = 1;
+      //moduleElement.style.flexBasis = manager.getModuleParent(this).storeMode === "VERTICAL" ? this.boundHeight[0] : this.boundWidth[0];
+      //moduleElement.style.flexBasis = this.boundHeight[0];
+      //moduleElement.style.flexGrow = 1;
 
-      /*
-      if (moduleElement === dfhdfh._attachedHTML.lastElementChild) {
-        moduleElement.style.flexBasis = ``;
-        moduleElement.style.flexGrow = 1;
-      }*/
+      //moduleElement.style.flexBasis = `${this.height}px`;
+      //moduleElement.style.flexGrow = 0;
 
-      //manager.showModule(manager.getModuleGlobalParent(this));
+      //if (manager.getModuleParent(this).lastChild === this._attachedHTML) {
+      //  console.log("last child");
+      //}
+
 
     } else {
       moduleElement.style.margin = `0px`;
@@ -129,8 +130,6 @@ const Module = function(manager) {
 
       moduleElement.style.display = `flex`;
       moduleElement.style.flexDirection = this.storeMode === "VERTICAL" ? `column` : `row`;
-
-      //manager.showModule(this);
     }
 
     return moduleElement;
@@ -142,10 +141,11 @@ const Module = function(manager) {
 
     this.canSize_N = false;
     this.canSize_S = parentModule.storeMode === "VERTICAL" ? true : false;
-    this.canSize_W = parentModule.storeMode === "HORIZONTAL" ? true : false;
-    this.canSize_E = false;
+    this.canSize_W = false;
+    this.canSize_E = parentModule.storeMode === "HORIZONTAL" ? true : false;
+    this._attachedHTML.style.flexGrow = 1 //<=========================================== should probably not put this here
 
-    const index = "VERTICAL" ? 
+    const index = this.storeMode === "VERTICAL" ? 
       manager.snapUtility.getVerticalMountIndex(parentModule, clientY) : 
       manager.snapUtility.getHorizontalMountIndex(parentModule, clientX); 
     
@@ -172,9 +172,11 @@ const Module = function(manager) {
     this.height = size.contentHeight;
 
     const parentModule = manager.getModuleParent(this);
+    
     this._attachedHTML.remove();
-    this.render();
     manager.showModule(this);
+    this.render();
+
     manager.snapUtility.setAutoBounds(parentModule);
 
     return true;

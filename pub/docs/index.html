@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <style>
+         body {
+            font-family: roboto;
+         }
+         .wrapper {
+            width: 70%;
+            margin: auto;
+         }
+         .table-header {
+            font-size: 30px;
+            margin: 14px;
+            margin-top: 50px;
+            font-weight: 500;
+         }
+         .docs {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+         }
+
+         .docs td, #docs th {
+            padding: 20px;
+            border-bottom: 0.5px solid #ddd;
+         }
+
+         .docs th {
+            text-align: left;
+            padding: 10px;
+            background-color: #2942ff;
+            color: white;
+         }
+
+         .docs tr > td:first-child { 
+            font-family: 'Courier New', monospace;
+         }
+         .properties-table tr > td:first-child + td { 
+            font-family: 'Courier New', monospace;
+            color: #2138ad;
+         }
+         .methods-table tr > td:first-child + td + td { 
+            font-family: 'Courier New', monospace;
+            color: #2138ad;
+         }
+
+         .properties-table span {
+            padding-left: 2px;
+            font-family: roboto;
+            color: #ff5e5e;
+            font-size: 10px;
+         }
+         .methods-table span {
+            font-family: 'Courier New', monospace;
+            color: #bf9113;
+         }
+         ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+         }
+         li {
+            margin: 10px;
+         }
+         .sidebar-link {
+            text-decoration: none;
+            color: gray;
+            transition: 0.3s;
+         }
+
+         .sidebar-link:hover {
+            color: black;
+            cursor: pointer;
+         }
+         .sidebar-wrapper {
+            position: fixed;
+            top: 10%;
+            right: 5%;
+         }
+         .class-header {
+            font-size: 60px;
+            margin: 20px;
+            margin-top: 100px;
+            text-align: center;
+            font-weight: 700;
+         }
+      </style>
+      <title>Documentation</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <script src="data.js"></script>
+      <script defer src="load.js"></script>
+   </head>
+   <body>
+      <div class="sidebar-wrapper">
+         <div style="margin: auto;">
+            <ul>
+               <li class="sidebar-link">Buildable</li>
+            </ul>
+         </div>
+      </div>
+      <div class="wrapper">
+         <div class= "CLASS-DIVIDER">
+            <div class="class-header">Module</div>
+            <div class="class-header-text">Class responsible for modules. Initiated within the Buildable class.</div>
+            <div class="table-header prop">Properties</div>
+            <table class="docs properties-table" id="table1">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+            <div class="table-header med">Methods</div>
+            <table class="docs methods-table" id="table2">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Parameters</th>
+                  <th>Returns</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+         </div>
+         <div class= "CLASS-DIVIDER">
+            <div class="class-header">Module</div>
+            <div class="class-header-text">Class responsible for modules. Initiated within the Buildable class.</div>
+            <div class="table-header prop">Properties</div>
+            <table class="docs properties-table" id="table1">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+            <div class="table-header med">Methods</div>
+            <table class="docs methods-table" id="table2">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Parameters</th>
+                  <th>Returns</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+         </div>
+         <div class= "CLASS-DIVIDER">
+            <div class="class-header">Module</div>
+            <div class="class-header-text">Class responsible for modules. Initiated within the Buildable class.</div>
+            <div class="table-header prop">Properties</div>
+            <table class="docs properties-table" id="table1">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+            <div class="table-header med">Methods</div>
+            <table class="docs methods-table" id="table2">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Parameters</th>
+                  <th>Returns</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+         </div>
+         <div class= "CLASS-DIVIDER">
+            <div class="class-header">Module</div>
+            <div class="class-header-text">Class responsible for modules. Initiated within the Buildable class.</div>
+            <div class="table-header prop">Properties</div>
+            <table class="docs properties-table" id="table1">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+            <div class="table-header med">Methods</div>
+            <table class="docs methods-table" id="table2">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Parameters</th>
+                  <th>Returns</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+         </div>
+         <div class= "CLASS-DIVIDER">
+            <div class="class-header">Module</div>
+            <div class="class-header-text">Class responsible for modules. Initiated within the Buildable class.</div>
+            <div class="table-header prop">Properties</div>
+            <table class="docs properties-table" id="table1">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+            <div class="table-header med">Methods</div>
+            <table class="docs methods-table" id="table2">
+               <col style="width:25%">
+               <col style="width:30%">
+               <col style="width:20%">
+               <col style="width:25%">
+               <tr>
+                  <th>Name</th>
+                  <th>Parameters</th>
+                  <th>Returns</th>
+                  <th>Description</th>
+               </tr>
+            </table>
+         </div>
+      </div>
+   </body>
+</html>

@@ -24,6 +24,7 @@ const ModuleDrag = function (manager) {
 }
 
 const ModuleSize = function (manager) {
+  
   this.setSize = (module, width, height) => {
     if (width < module.boundWidth[0]) width = module.boundWidth[0];
     if (width > module.boundWidth[1]) width = module.boundWidth[1];
@@ -37,7 +38,47 @@ const ModuleSize = function (manager) {
   }
 
   this.addSize = (module, xDelta, yDelta) => {
+    if (manager.getModuleParent(module) && module._attachedHTML.nextSibling) {
+      /*
+      const parent = manager.getModuleParent(module);
+      const allChildModules = manager.getChildModules(parent);
+      
+      let sumGrow = 0;
+      allChildModules.forEach(m => {
+        sumGrow += parseFloat(m._attachedHTML.style.flexGrow);
+      })
+
+      let thisHeight = 0;
+      let otherHeight = 0;
+      allChildModules.forEach(m => {
+        const size = getSizeCSS(m._attachedHTML);
+        const width = size.widthPaddingBorderMargin;
+        const height = size.heightPaddingBorderMargin;
+
+        if (m === module) thisHeight += height;
+        else otherHeight += height;
+      })
+
+      thisHeight += yDelta;
+      otherHeight -= yDelta;
+
+      let sumHeight = thisHeight + otherHeight;
+
+      //console.log(sumGrow, thisHeight, otherHeight);
+
+      const prevGrowNew = sumGrow * (thisHeight / sumHeight);
+      const nextGrowNew = sumGrow * (otherHeight / sumHeight);
+
+      console.log(thisHeight / sumHeight);*/
+
+      //module._attachedHTML.style.flexGrow = parseFloat(module._attachedHTML.style.flexGrow) + yDelta * 0.01;
+      //module._attachedHTML.nextSibling.style.flexGrow = parseFloat(module._attachedHTML.nextSibling.style.flexGrow) - yDelta * 0.01;
+
+      return;
+    }
+      
     this.setSize(module, module.width + xDelta, module.height + yDelta);
+  
   }
 
   this.addSizeReverse = (module, xDelta, yDelta) => {
@@ -100,18 +141,24 @@ const ModuleSnap = function (manager) {
 
   // Boundaries
 
-  this.setAutoBounds = (parentModule) => {
+  this.setAutoBounds = (parentModule) => {    
     const allChildModules = manager.getChildModules(parentModule);
+    
     if (allChildModules.length === 0) {
       parentModule.boundWidth = parentModule.boundWidthDefault;
       parentModule.boundHeight = parentModule.boundHeightDefault;
       manager.sizeUtility.addSize(parentModule, 0, 0);
+
+      if (manager.getModuleParent(parentModule))
+        this.setAutoBounds(manager.getModuleParent(parentModule));
+
       return;
     }
 
     const boundData = this.getChildBounds(parentModule);
 
     if (parentModule.storeMode === "VERTICAL") {
+      // Contradiction error
       if (boundData.minWidth > boundData.maxWidth || boundData.minHeightTotal > boundData.maxHeightTotal) {
         console.error('Min max contradicton error encountered');
         return; 
@@ -121,6 +168,7 @@ const ModuleSnap = function (manager) {
       parentModule.boundHeight = [boundData.minHeightTotal, boundData.maxHeightTotal];
 
     } else if (parentModule.storeMode === "HORIZONTAL") {
+      // Contradiction error
       if (boundData.minHeight > boundData.maxHeight || boundData.minWidthTotal > boundData.maxWidthTotal) {
         console.error('Min max contradicton error encountered');
         return; 
@@ -132,6 +180,10 @@ const ModuleSnap = function (manager) {
     }
 
     manager.sizeUtility.addSize(parentModule, 0, 0);
+
+    if (manager.getModuleParent(parentModule))
+      this.setAutoBounds(manager.getModuleParent(parentModule));
+
   }
 
   this.getChildBounds = (parentModule) => {
@@ -165,10 +217,10 @@ const ModuleSnap = function (manager) {
       allMaxHeight.push(module.boundHeight[1] + miscHeight);
     })
 
-    information.minWidth = Math.min(...allMinWidth);
-    information.maxWidth = Math.max(...allMaxWidth);
-    information.minHeight = Math.min(...allMinHeight);
-    information.maxHeight = Math.max(...allMaxHeight);
+    information.minWidth = Math.max(...allMinWidth);
+    information.maxWidth = Math.min(...allMaxWidth);
+    information.minHeight = Math.max(...allMinHeight);
+    information.maxHeight = Math.min(...allMaxHeight);
 
     information.minWidthTotal = allMinWidth.reduce((a, b) => a + b, 0);
     information.maxWidthTotal = allMaxWidth.reduce((a, b) => a + b, 0);
