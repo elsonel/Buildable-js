@@ -47,7 +47,7 @@ const Buildable = function (rootId) {
   }
 
   function onRelease(e) {
-    if (activeModule) snapModule(activeModule, e.clientX, e.clientY);
+    if (activeModule && activeModule._cursor === "move") snapModule(activeModule, e.clientX, e.clientY);
 
     isMouseDown = false;
     setActiveModule(null);
@@ -56,20 +56,17 @@ const Buildable = function (rootId) {
   /* Module Actions */
 
   const moveModule = (module, deltaX, deltaY) => {
+    if (moduleManager.getModuleParent(module)) module.unmount();
+    else moduleManager.dragUtility.addPosEvent(module, deltaX, deltaY);
 
+    /*
     if (module._container && !module.canUnmount) {
       // If the module cannot be unmounted, propogate input to its parent
       const parentModule = moduleManager.getModuleParent(module);
       if (parentModule) moveModule(parentModule, deltaX, deltaY);
 
-    } else if (module._container && module.canUnmount) {
-      // Unmounting module
-      module.unmount();
-
-    } else if (!module._container) {
-      // Moving global module normally
-      moduleManager.dragUtility.addPosEvent(module, deltaX, deltaY);
     }
+    */
 
   }
 
@@ -78,19 +75,19 @@ const Buildable = function (rootId) {
   }
 
   const snapModule = (module, clientX, clientY) => {
-//    if (!module.canMount) return;
-
     const allHoveredModules = getHoveredModules(clientX, clientY);
-    const toMount = allHoveredModules.find(m => moduleManager.getModuleGlobalParent(m) !== moduleManager.getModuleGlobalParent(module));
+    const target = allHoveredModules.find(m => moduleManager.getModuleGlobalParent(m) !== moduleManager.getModuleGlobalParent(module));
     
-    if (toMount) {
-      const cursor = toMount.getCursor(clientX, clientY);
-      const parentModule = moduleManager.getModuleParent(toMount);
-
-      if (cursor !== "move" && parentModule) module.mount(parentModule, clientX, clientY);
-      else module.mount(toMount, clientX, clientY);
+    if (target) {
+      const cursor = target.getCursor(clientX, clientY);
+      const parentModule = moduleManager.getModuleParent(target);
+      if (cursor !== "move" && parentModule) {
+        if (module.mount(parentModule, clientX, clientY)) return;
+      }
       
-      console.log(toMount._id, cursor);
+      module.mount(target, clientX, clientY);
+      
+      //console.log(target._id, cursor);
     } 
 
   }
@@ -125,8 +122,10 @@ const Buildable = function (rootId) {
 
   const setActiveModule = (module) => {    
     activeModule = module;
-    if (module) module.render();
-
+    if (module) {
+      if (module.backgroundLock) moduleManager.moveModuleBack(module);
+      else moduleManager.moveModuleFront(module);
+    }
   }
 
   const setCanvasCursor = () => {    

@@ -98,168 +98,162 @@ const ModuleSize = function (manager) {
 
 const ModuleSnap = function (manager) {
 
-  // Parenting Functions 
+  // Boundaries
 
-  this.getMinMaxWidth = (moduleArray) => {
-    const mins = moduleArray.map(module => {
-      const moduleElement = module._attachedHTML;
-      const size = getSizeCSS(moduleElement);
-      const misc = size.widthPaddingBorderMargin - size.contentWidth;
-      return misc + module.boundWidth[0];
-    })
-
-    const maxs = moduleArray.map(module => {
-      const moduleElement = module._attachedHTML;
-      const size = getSizeCSS(moduleElement);
-      const misc = size.widthPaddingBorderMargin - size.contentWidth;
-      return misc + module.boundWidth[1];
-    })
-
-    const min = Math.min(...mins);
-    const max = Math.max(...maxs);
-
-    if (min > max) { 
-      console.error("Error encountered due to sizing contradiction");
-      return null;
+  this.setAutoBounds = (parentModule) => {
+    const allChildModules = manager.getChildModules(parentModule);
+    if (allChildModules.length === 0) {
+      parentModule.boundWidth = parentModule.boundWidthDefault;
+      parentModule.boundHeight = parentModule.boundHeightDefault;
+      manager.sizeUtility.addSize(parentModule, 0, 0);
+      return;
     }
 
-    return [min, max];
-  }
+    const boundData = this.getChildBounds(parentModule);
 
-  this.getMinMaxHeight = (moduleArray) => {
-    const mins = moduleArray.map(module => {
-      const moduleElement = module._attachedHTML;
-      const size = getSizeCSS(moduleElement);
-      const misc = size.heightPaddingBorderMargin - size.contentHeight;
-      return misc + module.boundHeight[0];
-    })
+    if (parentModule.storeMode === "VERTICAL") {
+      if (boundData.minWidth > boundData.maxWidth || boundData.minHeightTotal > boundData.maxHeightTotal) {
+        console.error('Min max contradicton error encountered');
+        return; 
+      }
 
-    const maxs = moduleArray.map(module => {
-      const moduleElement = module._attachedHTML;
-      const size = getSizeCSS(moduleElement);
-      const misc = size.heightPaddingBorderMargin - size.contentHeight;
-      return misc + module.boundHeight[1];
-    })
+      parentModule.boundWidth = [boundData.minWidth, boundData.maxWidth];
+      parentModule.boundHeight = [boundData.minHeightTotal, boundData.maxHeightTotal];
 
-    const min = Math.min(...mins);
-    const max = Math.max(...maxs);
+    } else if (parentModule.storeMode === "HORIZONTAL") {
+      if (boundData.minHeight > boundData.maxHeight || boundData.minWidthTotal > boundData.maxWidthTotal) {
+        console.error('Min max contradicton error encountered');
+        return; 
+      }
 
-    if (min > max) { 
-      console.error("Error encountered due to sizing contradiction");
-      return null;
+      parentModule.boundWidth = [boundData.minWidthTotal, boundData.maxWidthTotal];
+      parentModule.boundHeight = [boundData.minHeight, boundData.maxHeight];
+
     }
 
-    return [min, max];
+    manager.sizeUtility.addSize(parentModule, 0, 0);
   }
 
-  this.getNonModuleHeight = function(module, storedModule) {
-    const allChildElements = manager.getChildElements(module._attachedHTML);
+  this.getChildBounds = (parentModule) => {
+    const information = {
+      minWidth: 0,
+      maxWidth: Infinity,
+      minHeight: 0,
+      maxHeight: Infinity,
+      minWidthTotal: 0,
+      maxWidthTotal: Infinity,
+      minHeightTotal: 0,
+      maxHeightTotal: Infinity,
+    }
 
-    let acc = 0;
-    allChildElements.forEach(element => {
-      if (storedModule._attachedHTML !== element) {
-        const rect = element.getBoundingClientRect();
-        acc += rect.height;
-      }
+    const allChildModules = manager.getChildModules(parentModule);
+    if (allChildModules.length === 0) return information;
+
+    const allMinWidth = [];
+    const allMaxWidth = [];
+    const allMinHeight = [];
+    const allMaxHeight = [];
+
+    allChildModules.forEach(module => {
+      const size = getSizeCSS(module._attachedHTML);
+      const miscWidth = size.widthPaddingBorderMargin - size.contentWidth;
+      const miscHeight = size.heightPaddingBorderMargin - size.contentHeight;
+
+      allMinWidth.push(module.boundWidth[0] + miscWidth);
+      allMaxWidth.push(module.boundWidth[1] + miscWidth);
+      allMinHeight.push(module.boundHeight[0] + miscHeight);
+      allMaxHeight.push(module.boundHeight[1] + miscHeight);
     })
 
-    return acc;
-  }
+    information.minWidth = Math.min(...allMinWidth);
+    information.maxWidth = Math.max(...allMaxWidth);
+    information.minHeight = Math.min(...allMinHeight);
+    information.maxHeight = Math.max(...allMaxHeight);
 
-  this.getModuleAvailableHeight = (module, storedModule) => {
-    const allChildElements = manager.getChildElements(module._attachedHTML);
+    information.minWidthTotal = allMinWidth.reduce((a, b) => a + b, 0);
+    information.maxWidthTotal = allMaxWidth.reduce((a, b) => a + b, 0);
+    information.minHeightTotal = allMinHeight.reduce((a, b) => a + b, 0);
+    information.maxHeightTotal = allMaxHeight.reduce((a, b) => a + b, 0);
 
-    let acc = 0;
-    allChildElements.forEach(element => {
-      if (storedModule._attachedHTML !== element) {
-        const size = getSizeCSS(element);
-        acc += size.heightPaddingBorderMargin;
-      }
-    })
-
-    const size = getSizeCSS(module._attachedHTML);
-    const moduleHeight = size.height;
-
-    return moduleHeight - acc;
-
+    return information;
   }
 
   // Insertions
 
-  this.insertStart = (parentModule, module) => {
-    const parentElement = parentModule._attachedHTML;
-    const childElement = module._attachedHTML;
-    parentElement.insertBefore(childElement, parentElement.firstChild);
-  }
-
-  this.insertEnd = (parentModule, module) => {
-    const parentElement = parentModule._attachedHTML;
-    const childElement = module._attachedHTML;
-    parentElement.appendChild(childElement);
-  }
-
-  this.insertBefore = (parentModule, siblingModule, module) => {
-    const parentElement = parentModule._attachedHTML;
-    const siblingElement = siblingModule._attachedHTML;
-    const childElement = module._attachedHTML;
-    parentElement.insertBefore(childElement, siblingElement);
-  }
-
-  this.insertAfter = (parentModule, siblingModule, module) => {
-    const parentElement = parentModule._attachedHTML;
-    const siblingElement = siblingModule._attachedHTML;
-    const childElement = module._attachedHTML;
-    parentElement.insertBefore(childElement, siblingElement.nextSibling);
-  }
-
-  this.insertModule = (parentModule, module, index) => {
-
-    const allChildModules = manager.getChildModules(parentModule);
+  this.insertIndex = (parentModule, module, index) => {
+    const allChildElements = manager.getChildElements(parentModule._attachedHTML);
     const parentElement = parentModule._attachedHTML;
     const moduleElement = module._attachedHTML;
-    const siblingModule = allChildModules[index];
-
-    if (!siblingModule) {
-      parentElement.appendChild(moduleElement);
-    }
-    else {
-      const siblingElement = allChildModules[index]._attachedHTML;
+    
+    const siblingElement = allChildElements[index];
+    if (siblingElement) {
       parentElement.insertBefore(moduleElement, siblingElement);
+      module.render();
+      return;
     }
 
+    parentElement.appendChild(moduleElement);
+    module.render();
   }
 
   this.getVerticalMountIndex = (parentModule, clientY) => {
-    const allChildModules = manager.getChildModules(parentModule);
-
-    // Container is empty, return 0
-    if (allChildModules.length === 0) return 0;
-
-    // Position is before first element, return 0
-    const firstModule = allChildModules[0];
-    const rect1 = firstModule._attachedHTML.getBoundingClientRect();
-    if (clientY < rect1.top) return 0;
+    // All elements currently in this module
+    const allChildElements = manager.getChildElements(parentModule._attachedHTML);
     
-    // Position is after last element, return child array length
-    const lastModule = allChildModules[allChildModules.length - 1];
-    const rect2 = lastModule._attachedHTML.getBoundingClientRect();
-    if (clientY > rect2.bottom) return allChildModules.length;
+    // If length is 0, just append an element 
+    if (allChildElements.length === 0) return 0;
+
+    // Check if to append at ends
+    const firstElementRect = allChildElements[0].getBoundingClientRect();
+    const lastElementRect = allChildElements[allChildElements.length - 1].getBoundingClientRect();
     
-    // Find the closest module to position 
-    const found = allChildModules.find(m => {
-      const rect = m._attachedHTML.getBoundingClientRect();
-      return (clientY < rect.bottom) && (clientY > rect.top);
-    })
+    if (clientY < firstElementRect.top) return 0;
+    if (clientY > lastElementRect.bottom) return allChildElements.length;
 
-    // return that modules position if above center, otherwise return next index
-    const rect = found._attachedHTML.getBoundingClientRect();
-    const centerY = (rect.bottom + rect.top) / 2;
+    // check to append in middle
+    for (let i = 0; i < allChildElements.length; i++) {
+      const element = allChildElements[i];
+      const rect = element.getBoundingClientRect();
 
-    if (clientY < centerY) return allChildModules.indexOf(found);
-    else return allChildModules.indexOf(found) + 1;
+      if (clientY > rect.top && clientY < rect.bottom) {
+        const centerY = (rect.top + rect.bottom) / 2;
+      
+        if (clientY < centerY) return i;
+        else return i + 1;
+      }
+    }
 
   }
   
+  this.getHorizontalMountIndex = (parentModule, clientX) => {
+    
+    // All elements currently in this module
+    const allChildElements = manager.getChildElements(parentModule._attachedHTML);
+    
+    // If length is 0, just append an element 
+    if (allChildElements.length === 0) return 0;
+
+    // Check if to append at ends
+    const firstElementRect = allChildElements[0].getBoundingClientRect();
+    const lastElementRect = allChildElements[allChildElements.length - 1].getBoundingClientRect();
+    
+    if (clientX < firstElementRect.left) return 0;
+    if (clientX > lastElementRect.right) return allChildElements.length;
+
+    // check to append in middle
+    for (let i = 0; i < allChildElements.length; i++) {
+      const element = allChildElements[i];
+      const rect = element.getBoundingClientRect();
+
+      if (clientX > rect.left && clientX < rect.right) {
+        const centerX = (rect.left + rect.right) / 2;
+      
+        if (clientX < centerX) return i;
+        else return i + 1;
+      }
+    }
+  }
+
 }
 
 const ModuleManager = function (rootElement) {
@@ -278,7 +272,8 @@ const ModuleManager = function (rootElement) {
     }
   
     this.getModuleByElement = (element) => {
-      return this.getModuleById(element.dataset.moduleId);
+      if (element == null) return null
+      else return this.getModuleById(element.dataset.moduleId);
     }
 
     this.getElementByModule = (module) => {
@@ -321,9 +316,29 @@ const ModuleManager = function (rootElement) {
     }
   
     // External
+
+    this.moveModuleBack = (module) => {
+      if (!rootElement.contains(this.getElementByModule(module))) return;
+
+      if (this.getModuleParent(module)) {
+        rootElement.insertBefore(this.getElementByModule(this.getModuleGlobalParent(module)), rootElement.firstChild);
+      } else {
+        rootElement.insertBefore(this.getElementByModule(module), rootElement.firstChild);
+      }
+    }
+
+    this.moveModuleFront = (module) => {
+      if (!rootElement.contains(this.getElementByModule(module))) return;
+
+      if (this.getModuleParent(module)) {
+        rootElement.appendChild(this.getElementByModule(this.getModuleGlobalParent(module)));
+      } else {
+        rootElement.appendChild(this.getElementByModule(module));  
+      }
+    }
   
     this.showModule = (module) => {
-      rootElement.appendChild(this.getElementByModule(module));
+      if (!rootElement.contains(this.getElementByModule(module))) rootElement.appendChild(this.getElementByModule(module));  
     }
   
     this.hideModule = (module) => {
@@ -343,7 +358,10 @@ const ModuleManager = function (rootElement) {
     this.createModule = () => {   
       const module = new Module(this);
       this.allModules[module._id] = module;
-  
+      
+      module.render();
+      this.showModule(module);
+
       return module;
     }
 }
