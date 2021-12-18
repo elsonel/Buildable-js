@@ -205,7 +205,7 @@ render({
         position: relative;
     }`,
     title: 'Multiple Modules',
-    text: `Modules can be snapped into one another by dragging and releasing. Dragging a free module between two siblings will insert that module inbetween them. If there are multiple siblings, the library will attempt to insert the released module at the index closest to the mouse position. Furthermore, the library will automatically attempt to adjust the parent module's boundaries in respect to the boundaries of all its children`,
+    text: `Modules can be snapped into one another by dragging and releasing, with all results being reflected in the DOM. Dragging a free module between two siblings will insert that module inbetween them. If there are multiple siblings, the library will attempt to insert the released module at the index closest to the mouse position. Furthermore, the library will automatically attempt to adjust the parent module's boundaries in respect to the boundaries of all its children`,
     callback: (rootElement) => {        
 
         const BUILDABLE = new Buildable(rootElement);

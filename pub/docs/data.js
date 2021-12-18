@@ -18,13 +18,13 @@ const moduleSizeMethods = [
     "NAME": "setSize",
     "PARAMETERS": "<span>module: Module</span><br>\nThe module's to be affected<br><br>\n<span>width: number</span><br>\nThe module's new width. Must be a positive value<br><br>\n<span>height: number</span><br>\nThe module's new height. Must be a positive value",
     "RETURNS": "void",
-    "DESCRIPTION": "Set the specified module's current size. Considers sizing bound restrictions. Does nothing if module is currently a child of another module"
+    "DESCRIPTION": "Set the specified module's current size. Considers min and max size restrictions but ignores permissions. Does nothing if module is currently a child of another module"
   },
   {
     "NAME": "addSize",
     "PARAMETERS": "<span>module: Module</span><br>\nThe module's to be affected<br><br>\n<span>width: number</span><br>\nThe module's new width. Must be a positive value<br><br>\n<span>height: number</span><br>\nThe module's new height. Must be a positive value",
     "RETURNS": "void",
-    "DESCRIPTION": "Add to the specified module's current size. Considers sizing bound restrictions. Does nothing if module is currently a child of another module"
+    "DESCRIPTION": "Add to the specified module's current size. Considers min and max size restrictions but ignores permissions. Does nothing if module is currently a child of another module"
   }
 ]
 

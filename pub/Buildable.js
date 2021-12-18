@@ -1,5 +1,4 @@
-const Buildable = function (rootId) {
-  const rootElement = document.getElementById(rootId);
+const Buildable = function (rootElement) {
   rootElement.addEventListener("mousedown", onPress);
   rootElement.addEventListener("mousemove", onMove);
   rootElement.addEventListener("mouseup", onRelease);

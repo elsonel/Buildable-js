@@ -9,8 +9,8 @@ const Module = function(manager) {
   this._cursor = 'default';
 
   // Move settings:
-  this.xDefault = 500;
-  this.yDefault = 500;
+  this.xDefault = 0;
+  this.yDefault = 0;
   this.x = this.xDefault;
   this.y = this.yDefault;
 
@@ -21,8 +21,8 @@ const Module = function(manager) {
   // Size settings:
   this.cursorTol = 10;
 
-  this.widthDefault = 200;
-  this.heightDefault = 200;
+  this.widthDefault = 100;
+  this.heightDefault = 100;
   this.width = this.widthDefault;
   this.height = this.heightDefault;
 
@@ -123,8 +123,8 @@ const Module = function(manager) {
       moduleElement.style.margin = `0px`;
       moduleElement.style.position = 'absolute';
 
-      moduleElement.style.top = this.y;
-      moduleElement.style.left = this.x;
+      moduleElement.style.top = `${this.y}px`;
+      moduleElement.style.left = `${this.x}px`;
       moduleElement.style.width = `${this.width}px`;
       moduleElement.style.height = `${this.height}px`;
 
@@ -145,7 +145,7 @@ const Module = function(manager) {
     this.canSize_E = parentModule.storeMode === "HORIZONTAL" ? true : false;
     this._attachedHTML.style.flexGrow = 1 //<=========================================== should probably not put this here
 
-    const index = this.storeMode === "VERTICAL" ? 
+    const index = parentModule.storeMode === "VERTICAL" ? 
       manager.snapUtility.getVerticalMountIndex(parentModule, clientY) : 
       manager.snapUtility.getHorizontalMountIndex(parentModule, clientX); 
     
@@ -163,9 +163,11 @@ const Module = function(manager) {
     this.canSize_W = true;
     this.canSize_E = true;
 
+    const parentRect = manager.canvasElement.getBoundingClientRect();
     const rect = this._attachedHTML.getBoundingClientRect();
-    this.x = rect.left;
-    this.y = rect.top;
+
+    this.x = rect.left - parentRect.left;
+    this.y = rect.top - parentRect.top;
 
     const size = getSizeCSS(this._attachedHTML);
     this.width = size.contentWidth;
