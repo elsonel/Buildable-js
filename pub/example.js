@@ -1,35 +1,94 @@
 
-function injectContent(module) {
-    const moduleElement = module._attachedHTML;
+// Buttons for creating more modules
 
-    // Random color generator code is from stack overflow
-    moduleElement.className = "module";
-    moduleElement.style.backgroundColor = '#'+(0x1000000+Math.random()*0xffffff).toString(16).substr(1,6);
-
-    return;
-    const newDiv = document.createElement("div");
-    newDiv.innerHTML = module._id;
-    moduleElement.appendChild(newDiv);
-
-    return;
+function createVerticalModule() {
+    const module = BUILDABLE.createModule();
+    module.storeMode = "VERTICAL";
+    return module;
 }
 
-// Initalize library by passing in root element id 
-const $$ = new Buildable("canvas");
+function createHorizontalModule() {
+    const module = BUILDABLE.createModule();
+    module.storeMode = "HORIZONTAL";
+    return module;
+}
 
-const mod7 = $$.createModule();
-injectContent(mod7);
+// This is the example used to create the landing page
 
-const mod8 = $$.createModule();
-injectContent(mod8);
+const rootElement = document.getElementById("canvas");
+const BUILDABLE = new Buildable(rootElement);
+        
+// background module, move to middle and restrict movement
+const moduleA = BUILDABLE.createModule();
+moduleA.canMove = false;
+moduleA.canSize = false;
+BUILDABLE.sizeUtility.setSize(moduleA, 800, 400);
+const moduleARect = moduleA._attachedHTML.getBoundingClientRect();
+BUILDABLE.dragUtility.setPos(moduleA, (window.innerWidth / 2) - moduleARect.width / 2, (window.innerHeight / 2) - moduleARect.height / 2);
+moduleA.backgroundLock = true;
 
-const mod9 = $$.createModule();
-injectContent(mod9);
+// title module
+const moduleB = BUILDABLE.createModule();
+moduleB.boundWidth = [450, Infinity];
+moduleB.boundHeight = [100, Infinity];
 
-const mod10 = $$.createModule();
-injectContent(mod10);
+// subtitle module
+const moduleC = BUILDABLE.createModule();
+moduleC.boundWidth = [300, Infinity];
+moduleC.boundHeight = [50, Infinity];
 
-const mod11 = $$.createModule();
-injectContent(mod11);
+// container module to hold buttons horizontally
+const moduleD = BUILDABLE.createModule();
+moduleD.canMove = false;
+moduleD.storeMode = "HORIZONTAL";
 
-mod7.mount(mod8);
+// mount all content modules onto the background module
+moduleB.mount(moduleA);
+moduleC.mount(moduleA);
+moduleD.mount(moduleA);
+
+// button modules
+const module1 = BUILDABLE.createModule();
+module1.boundWidth = [160, Infinity];
+
+const module2 = BUILDABLE.createModule();
+module2.boundWidth = [90, Infinity];
+
+const module3 = BUILDABLE.createModule();
+module3.boundWidth = [320, Infinity];
+
+// mount all button modules onto container module
+module1.mount(moduleD);
+module2.mount(moduleD);
+module3.mount(moduleD);
+
+// injecting content
+
+moduleB._attachedHTML.innerHTML = `<div class="heading">Buildable.js</div>`;
+moduleC._attachedHTML.innerHTML = `<div class="subtext">Create dynamic UI backboards for customizable workspaces (try me!)</div>`;
+
+module1._attachedHTML.innerHTML = `<button onmousedown="window.location.href='/gettingstarted'" class="button" type="button">GET STARTED</button>`;
+module2._attachedHTML.innerHTML = `<button onmousedown="window.location.href='/docs'" class="button" type="button">API</button>`;
+module3._attachedHTML.innerHTML = `<div class="button-div"><button class="button button-small" onmousedown="createVerticalModule()" type="button">+ VERTICAL</button><button class="button button-small" onmousedown="createHorizontalModule()" type="button">+ HORIZONTAL</button></div>`;
+
+// Styling
+
+moduleA._attachedHTML.style.border = "3px solid #cfcfcf";
+moduleA._attachedHTML.style.backgroundColor = "#ededed";
+moduleA._attachedHTML.style.padding = '20px';
+
+moduleB._attachedHTML.style.border = "3px solid #cfcfcf";
+moduleB._attachedHTML.style.color = "#e3e3e3";
+moduleB._attachedHTML.style.backgroundColor = "#383838";
+
+moduleC._attachedHTML.style.border = "3px solid #cfcfcf";
+moduleC._attachedHTML.style.color = "#e3e3e3";
+moduleC._attachedHTML.style.backgroundColor = "#808080";
+
+moduleD._attachedHTML.style.border = "3px solid #cfcfcf";
+moduleD._attachedHTML.style.color = "#e3e3e3";
+moduleD._attachedHTML.style.backgroundColor = "#b0b0b0";
+
+module1._attachedHTML.style.border = "3px solid #474747";
+module2._attachedHTML.style.border = "3px solid #474747";
+module3._attachedHTML.style.border = "3px solid #474747";

@@ -251,7 +251,7 @@ render({
         position: relative;
     }`,
     title: 'Snap Settings 1',
-    text: `Modules can be stored horizontally and mounted manually.`,
+    text: `Modules can also be stored horizontally and mounted manually.`,
     callback: (rootElement) => {        
 
         const BUILDABLE = new Buildable(rootElement);
@@ -413,7 +413,7 @@ render({
         /*box-sizing: border-box;*/
     }`,
     title: 'Styling',
-    text: `HTML classes and ids can be assigned to Buildable modules. Buildable modules work with both paddings, borders and border-box box sizing, but not margins. Other CSS properties such as position, width, height, left and top are overwritten by the library.`,
+    text: `HTML classes and ids can be assigned to Buildable modules. Buildable modules work with both paddings, borders and border-box box sizing, but not margins. Other CSS properties such as position, width, height, left and top are overwritten by the library and should be left untouched.`,
     callback: (rootElement) => {                
         const BUILDABLE = new Buildable(rootElement);
         

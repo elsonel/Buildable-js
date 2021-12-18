@@ -11,15 +11,11 @@ app.use(express.static(path.join(__dirname, '/pub')))
 // Routes
 
 app.get('/', function(req, res) {
-    res.sendFile('/pub/home/index.html', { root: __dirname });
-});
-
-app.get('/examples', function(req, res) {
-    res.sendFile('/pub/examples.html', { root: __dirname });
+    res.sendFile('/pub/index.html', { root: __dirname });
 });
 
 app.get('/gettingstarted', function(req, res) {
-    res.sendFile('/pub/examples.html', { root: __dirname });
+    res.sendFile('/pub/gettingstarted/index.html', { root: __dirname });
 });
 
 app.get('/docs', function(req, res) {
