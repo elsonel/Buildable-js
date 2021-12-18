@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <style>
+         body {
+            font-family: roboto;
+         }
+         .wrapper {
+            width: 70%;
+            margin: auto;
+         }
+
+         .canvas {
+            background-color: blue;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            position: relative;
+         }
+
+         ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+         }
+         li {
+            margin-top: 10px;
+         }
+         .sidebar-link {
+            text-decoration: none;
+            color: gray;
+            transition: 0.3s;
+         }
+
+         .sidebar-link:hover {
+            color: black;
+            cursor: pointer;
+            user-select: none;
+         }
+         .sidebar-wrapper {
+            position: fixed;
+            top: 10%;
+            right: 4%;
+         }
+         .left-sidebar-wrapper {
+            position: fixed;
+            top: 10%;
+            left: 2.4%;
+            font-size: 20px;
+         }
+         .left-sidebar-title {
+            text-decoration: none;
+            color: black;
+            font-size: 30px;
+            font-weight: 500;
+         }
+         .class-header {
+            font-size: 60px;
+            padding-top: 60px;
+            padding-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+         }
+         .class-header-title {
+            font-size: 30px;
+            padding: 10px;
+            font-weight: 500;
+         }
+         .class-header-text {
+            padding: 10px;
+            padding-bottom: 40px;
+         }
+         .button {
+            border: none;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+         }
+         .button-container {
+            margin-top: 20px;
+         }
+         .button:first-child {
+            font-weight: 700;
+         }
+         .test-code {
+            margin-bottom: 30px;
+         }
+         .module {
+			   user-select: none;
+            background-color: white;
+			   padding: 15px;
+			   border: 10px solid black;
+            /*box-sizing: border-box;*/
+         }
+
+         .footer {
+            font-weight: 500;
+            width: 100%;
+            margin: 50px;
+            text-align: center;
+         }
+      </style>
+      <title>Documentation</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/xcode.min.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+      <script src="Buildable_Utility.js"></script>
+		<script src="Buildable_Module.js"></script>
+		<script src="Buildable_Manager.js"></script>
+		<script src="Buildable.js"></script>
+      <script defer src="index.js"></script>
+   </head>
+   <body>
+      <div class="left-sidebar-wrapper">
+         <div><a class="left-sidebar-title" href="/">Buildable.js</a></div>
+         <ul>
+            <li><a class="sidebar-link" href="/examples">Examples</a></li>
+            <li><a class="sidebar-link" href="/gettingstarted">Getting Started</a></li>
+            <li><a class="sidebar-link" href="/docs">API</a></li>
+         </ul>
+      </div>
+
+      <div class="sidebar-wrapper">
+         <div style="margin: auto;">
+            <ul>
+               <li onClick="rightSidebarOnClick(`Setup`)" class="sidebar-link">Setup</li>
+               <li onClick="rightSidebarOnClick(1)" class="sidebar-link">Initialization</li>
+               <li onClick="rightSidebarOnClick(2)" class="sidebar-link">Dynamic Properties</li>
+               <li onClick="rightSidebarOnClick(3)" class="sidebar-link">Module Behaviour</li>
+               <li onClick="rightSidebarOnClick(4)" class="sidebar-link">Multiple Modules</li>
+               <li onClick="rightSidebarOnClick(5)" class="sidebar-link">Snap Settings 1</li>
+               <li onClick="rightSidebarOnClick(6)" class="sidebar-link">Snap Settings 2</li>
+               <li onClick="rightSidebarOnClick(7)" class="sidebar-link">Content Injection</li>
+               <li onClick="rightSidebarOnClick(8)" class="sidebar-link">Style</li>
+            </ul>
+         </div>
+      </div>
+      <div class="wrapper">
+         <div class="class-header">Getting Started</div>
+         <div class= "CLASS-DIVIDER">
+            <div class="class-header-title" id="Setup">Setup</div>
+            <div class="class-header-text">Use the library in your projects by linking it in your HTML heading.</div>
+            <pre><code class="test-code">
+   &lt;head&gt;
+      &lt;script src=&quot;Buildable.js&quot;&gt;&lt;/script&gt;
+   &lt;/head&gt;
+            </code></pre>
+            <div class="class-header-text">Create a root element and ensure that it has position style relative.</div>
+            <pre><code class="test-code">
+   &lt;body&gt;
+      &lt;div class=&quot;canvas&quot; style=&quot;position: relative;&quot;&gt;&lt;/div&gt;
+   &lt;/body&gt;
+            </code></pre>
+         </div>
+      </div>
+      <div class="footer">Visit the <a href="/docs">API</a> for a comprehensive overview of all functionality</div>
+   </body>
+</html>

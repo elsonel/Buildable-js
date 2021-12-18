@@ -3,13 +3,13 @@ const moduleDragMethods = [
     "NAME": "setPos",
     "PARAMETERS": "<span>module: Module</span><br>\nThe module's to be affected<br><br>\n<span>x: number</span><br>\nThe module's new x position<br><br>\n<span>y: number</span><br>\nThe module's new y position",
     "RETURNS": "void",
-    "DESCRIPTION": "Set the specified module's current position"
+    "DESCRIPTION": "Set the specified module's current position. Does nothing if module is currently a child of another module"
   },
   {
     "NAME": "addPos",
     "PARAMETERS": "<span>module: Module</span><br>\nThe module's to be affected<br><br>\n<span>xDelta: number</span><br>\nThe value to be added to the module's current width<br><br>\n<span>yDelta: number</span><br>\nThe value to be added to the module's current height",
     "RETURNS": "void",
-    "DESCRIPTION": "Add to the specified module's current position"
+    "DESCRIPTION": "Add to the specified module's current position. Does nothing if module is currently a child of another module"
   }
 ]
 
@@ -18,13 +18,13 @@ const moduleSizeMethods = [
     "NAME": "setSize",
     "PARAMETERS": "<span>module: Module</span><br>\nThe module's to be affected<br><br>\n<span>width: number</span><br>\nThe module's new width. Must be a positive value<br><br>\n<span>height: number</span><br>\nThe module's new height. Must be a positive value",
     "RETURNS": "void",
-    "DESCRIPTION": "Set the specified module's current size. Considers sizing bound restrictions"
+    "DESCRIPTION": "Set the specified module's current size. Considers sizing bound restrictions. Does nothing if module is currently a child of another module"
   },
   {
     "NAME": "addSize",
     "PARAMETERS": "<span>module: Module</span><br>\nThe module's to be affected<br><br>\n<span>width: number</span><br>\nThe module's new width. Must be a positive value<br><br>\n<span>height: number</span><br>\nThe module's new height. Must be a positive value",
     "RETURNS": "void",
-    "DESCRIPTION": "Add to the specified module's current size. Considers sizing bound restrictions"
+    "DESCRIPTION": "Add to the specified module's current size. Considers sizing bound restrictions. Does nothing if module is currently a child of another module"
   }
 ]
 
@@ -400,6 +400,12 @@ const moduleMethods = [
     "PARAMETERS": "",
     "RETURNS": "boolean",
     "DESCRIPTION": "Unmount this module and append it to the root element. Hooks that optimize the child module and parent module's properties are automatically called"
+  },
+  {
+    "NAME": "render",
+    "PARAMETERS": "",
+    "RETURNS": "void",
+    "DESCRIPTION": "Sync this module's class properties to its associated HTMLCanvasElement. This function is called automatically on user interaction and property changes. It does not need to be called manually."
   }
 ]
 

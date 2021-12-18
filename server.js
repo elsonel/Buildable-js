@@ -22,7 +22,7 @@ app.get('/gettingstarted', function(req, res) {
     res.sendFile('/pub/examples.html', { root: __dirname });
 });
 
-app.get('/documentation', function(req, res) {
+app.get('/docs', function(req, res) {
     res.sendFile('/pub/docs/index.html', { root: __dirname });
 });
 
