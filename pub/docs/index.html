@@ -61,7 +61,7 @@
             padding: 0;
          }
          li {
-            margin: 10px;
+            margin-top: 10px;
          }
          .sidebar-link {
             text-decoration: none;
@@ -72,11 +72,24 @@
          .sidebar-link:hover {
             color: black;
             cursor: pointer;
+            user-select: none;
          }
          .sidebar-wrapper {
             position: fixed;
             top: 10%;
-            right: 5%;
+            right: 4%;
+         }
+         .left-sidebar-wrapper {
+            position: fixed;
+            top: 10%;
+            left: 2.5%;
+            font-size: 20px;
+         }
+         .left-sidebar-title {
+            text-decoration: none;
+            color: black;
+            font-size: 30px;
+            font-weight: 500;
          }
          .class-header {
             font-size: 60px;
@@ -90,14 +103,28 @@
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <script src="buttons.js"></script>
       <script src="data.js"></script>
-      <script defer src="load.js"></script>
+      <script defer src="index.js"></script>
    </head>
    <body>
+      <div class="left-sidebar-wrapper">
+         <div><a class="left-sidebar-title" href="/">Buildable.js</a></div>
+         <ul>
+            <li><a class="sidebar-link" href="/examples">Examples</a></li>
+            <li><a class="sidebar-link" href="/gettingstarted">Getting Started</a></li>
+            <li><a class="sidebar-link" href="/documentation">API</a></li>
+         </ul>
+      </div>
+
       <div class="sidebar-wrapper">
          <div style="margin: auto;">
             <ul>
-               <li class="sidebar-link">Buildable</li>
+               <li onClick="onClassClick(0)" class="sidebar-link">Buildable</li>
+               <li onClick="onClassClick(1)" class="sidebar-link">ModuleDrag</li>
+               <li onClick="onClassClick(2)" class="sidebar-link">ModuleSize</li>
+               <li onClick="onClassClick(3)" class="sidebar-link">ModuleSnap</li>
+               <li onClick="onClassClick(4)" class="sidebar-link">Module</li>
             </ul>
          </div>
       </div>

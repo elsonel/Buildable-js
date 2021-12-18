@@ -402,3 +402,4 @@ const moduleMethods = [
     "DESCRIPTION": "Unmount this module and append it to the root element. Hooks that optimize the child module and parent module's properties are automatically called"
   }
 ]
+
