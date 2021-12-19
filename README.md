@@ -63,7 +63,7 @@ module.boundWidth = [50, 200];
 
 Modules can be snapped into one another by dragging and releasing, with all results being reflected in the DOM. 
 
-Dragging and releasing a module between the border of two siblings will insert that module in-between them. 
+Dragging and releasing a module between the border of two siblings will insert that module in-between them (you have to be precisely on the border). 
 
 If there are multiple siblings, Buildable will attempt to insert the released module at the index closest to the mouse position. 
 
