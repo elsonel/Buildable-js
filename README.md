@@ -69,7 +69,7 @@ If there are multiple siblings, Buildable will attempt to insert the released mo
 
 Buildable will automatically attempt to adjust the parent module's boundaries in respect to the boundaries of all its children.
 
-Modules can also be stored horizontally and mounted manually.
+Modules can also be stored horizontally and mounted programmatically.
 
 ```javascript
 const moduleA = BUILDABLE.createModule();
