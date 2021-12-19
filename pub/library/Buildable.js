@@ -177,11 +177,18 @@
       if (!this.canMount) return false;
       if (!parentModule.canStore) return false;
   
+      // Maybe in the future you will be able to resize internal child modules
+      // this.canSize_N = false;
+      // this.canSize_S = parentModule.storeMode === "VERTICAL" ? true : false;
+      // this.canSize_W = false;
+      // this.canSize_E = parentModule.storeMode === "HORIZONTAL" ? true : false;
+
       this.canSize_N = false;
-      this.canSize_S = parentModule.storeMode === "VERTICAL" ? true : false;
+      this.canSize_S = false;
       this.canSize_W = false;
-      this.canSize_E = parentModule.storeMode === "HORIZONTAL" ? true : false;
-      this._attachedHTML.style.flexGrow = 1 //<=========================================== should probably move this
+      this.canSize_E = false;
+
+      this._attachedHTML.style.flexGrow = 1
   
       const index = parentModule.storeMode === "VERTICAL" ? 
         manager.snapUtility.getVerticalMountIndex(parentModule, clientY) : 
