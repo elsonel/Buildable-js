@@ -85,9 +85,9 @@ moduleC.storeMode = "HORIZONTAL";
 moduleD.storeMode = "HORIZONTAL";
 
 document.addEventListener("DOMContentLoaded", function(event){
-    moduleB.mount(moduleA);
-    moduleC.mount(moduleA);
-    moduleD.mount(moduleA);
+	moduleB.mount(moduleA);
+	moduleC.mount(moduleA);
+	moduleD.mount(moduleA);
 });
 ```
 
@@ -137,20 +137,20 @@ injectContent(moduleB);
 HTML classes and ids can be assigned to Buildable modules. Buildable modules work with both paddings, borders and border-box box sizing, but not margins. Other CSS properties such as position, width, height, left and top are overwritten by the library and should be left untouched.
 
 ```javascript
-    const moduleA = BUILDABLE.createModule();
-    const moduleB = BUILDABLE.createModule();
+const moduleA = BUILDABLE.createModule();
+const moduleB = BUILDABLE.createModule();
 
-    // Clear all JS assigned CSS styles
-    moduleA._attachedHTML.attributeStyleMap.clear();
-    moduleB._attachedHTML.attributeStyleMap.clear();
+// Clear all JS assigned CSS styles
+moduleA._attachedHTML.attributeStyleMap.clear();
+moduleB._attachedHTML.attributeStyleMap.clear();
     
-    // Resync essential properties
-    moduleA.render();
-    moduleB.render();
+// Resync essential properties
+moduleA.render();
+moduleB.render();
 
-    // Assign stylesheet
-    moduleA._attachedHTML.className = "module";
-    moduleB._attachedHTML.className = "module";
+// Assign stylesheet
+moduleA._attachedHTML.className = "module";
+moduleB._attachedHTML.className = "module";
 ```
 
 ## Documentation
