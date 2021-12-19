@@ -44,6 +44,11 @@
 
   // Main module class
   const Module = function(manager) {
+    // It's more efficient to convert all pproperty functions in this class to 
+    // prototypes since multiple Module instances are being created. I chose not 
+    // to do this in the final packaged library for the sake of readability to 
+    // keep everything encapsulated within the class brackets.
+
     this._id = uuidv4();
     this._attachedHTML = (() => {
       const moduleElement = document.createElement('div');
@@ -641,6 +646,9 @@
     let startX = 0;
     let startY = 0;
 
+    let dragX = 0;
+    let dragY = 0;
+
     // Event Callbacks
     function onPress (e) {
       isMouseDown = true;
@@ -664,6 +672,8 @@
         const deltaY = (e.clientY - startY);
         startX = e.clientX;
         startY = e.clientY;
+        dragX += deltaX;
+        dragY += deltaY;
 
         if (activeModule._cursor === 'move') moveModule(activeModule, deltaX, deltaY);
         else sizeModule(activeModule, deltaX, deltaY);
@@ -683,8 +693,19 @@
     /* Module Actions */
 
     const moveModule = (module, deltaX, deltaY) => {
-      if (moduleManager.getModuleParent(module)) module.unmount();
-      else moduleManager.dragUtility.addPosEvent(module, deltaX, deltaY);
+      if (moduleManager.getModuleParent(module)) {
+
+        // To unmount a module, you have to drag it past a set tolerance first,
+        // this prevents you from accidently unmounting
+        const tol = 20;
+        const dist = Math.hypot(dragX, dragY);
+        if (dist > tol) {
+          module.unmount();
+          moduleManager.dragUtility.addPos(module, dragX, dragY);
+        }
+      } else { 
+        moduleManager.dragUtility.addPosEvent(module, deltaX, deltaY)
+      };
 
     }
 
@@ -741,6 +762,8 @@
     const setActiveModule = (module) => {    
       activeModule = module;
       if (module) {
+        dragX = 0;
+        dragY = 0;
         if (moduleManager.getModuleGlobalParent(module).backgroundLock) moduleManager.moveModuleBack(module);
         else moduleManager.moveModuleFront(module);
       }
