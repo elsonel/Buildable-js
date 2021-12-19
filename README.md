@@ -61,7 +61,7 @@ module.boundWidth = [50, 200];
 
 ### Nesting Modules
 
-Modules can be snapped into one another by dragging and releasing, with all nesting relationships being reflected in the DOM. 
+Modules can be snapped into one another by dragging and releasing them over another module, with all nesting relationships being reflected in the DOM. 
 
 Dragging and releasing a module between the border of two siblings will insert that module in-between them (you have to be precisely on the border). 
 
