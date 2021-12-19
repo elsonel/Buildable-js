@@ -69,7 +69,9 @@ If there are multiple siblings, Buildable will attempt to insert the released mo
 
 Buildable will automatically attempt to adjust the parent module's boundaries in respect to the boundaries of all its children.
 
-Modules can also be stored horizontally and mounted programmatically.
+Modules can also be stored horizontally and mounted programmatically. 
+
+To unmount a child module, just drag it out. Keep in mind that there is a small tolerance to drag past for the event to trigger to prevent accidental unmounting.
 
 ```javascript
 const moduleA = BUILDABLE.createModule();
