@@ -79,7 +79,7 @@ render({
         overflow: hidden;
         position: relative;
     }`,
-    title: 'Initization',
+    title: 'Initialization',
     text: `Initialize the library by passing in the root element and call createModule() to begin create modules. 
 
     Each individual module can be dragged and resized.`,
@@ -165,7 +165,7 @@ render({
         overflow: hidden;
         position: relative;
     }`,
-    title: 'Module behavior',
+    title: 'Module Behavior',
     text: `Certain module properties can be changed directly to alter behavior on user interaction.`,
     callback: (rootElement) => {        
 
