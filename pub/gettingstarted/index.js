@@ -80,7 +80,9 @@ render({
         position: relative;
     }`,
     title: 'Initization',
-    text: 'Initialize the library by passing in the root element and call createModule() to begin create modules. Each individual module can be dragged and resized.',
+    text: `Initialize the library by passing in the root element and call createModule() to begin create modules. 
+
+    Each individual module can be dragged and resized.`,
     callback: (rootElement) => {
         const BUILDABLE = new Buildable(rootElement);
         const module = BUILDABLE.createModule();
@@ -136,7 +138,7 @@ render({
     },
 });
 
-// Changing module behaviour
+// Changing module behavior
 render({
     id:"3",
     JS: `
@@ -163,8 +165,8 @@ render({
         overflow: hidden;
         position: relative;
     }`,
-    title: 'Module Behaviour',
-    text: `Certain module properties can be changed directly to alter behaviour on user interaction.`,
+    title: 'Module behavior',
+    text: `Certain module properties can be changed directly to alter behavior on user interaction.`,
     callback: (rootElement) => {        
 
         const BUILDABLE = new Buildable(rootElement);
@@ -205,7 +207,15 @@ render({
         position: relative;
     }`,
     title: 'Multiple Modules',
-    text: `Modules can be snapped into one another by dragging and releasing, with all results being reflected in the DOM. Dragging a free module between two siblings will insert that module inbetween them. If there are multiple siblings, the library will attempt to insert the released module at the index closest to the mouse position. Furthermore, the library will automatically attempt to adjust the parent module's boundaries in respect to the boundaries of all its children`,
+    text: `Modules can be snapped into one another by dragging and releasing, with all results being reflected in the DOM.
+
+    Dragging a free module between two siblings will insert that module in-between them. 
+    
+    If there are multiple siblings, Buildable will attempt to insert the released module at the index closest to the mouse position. 
+    
+    Buildable will automatically attempt to adjust the parent module's boundaries in respect to the boundaries of all its children.
+    
+    Modules can also be stored horizontally and mounted manually.`,
     callback: (rootElement) => {        
 
         const BUILDABLE = new Buildable(rootElement);
@@ -305,7 +315,7 @@ render({
         position: relative;
     }`,
     title: 'Snap Settings 2',
-    text: `Snapping behaviour can be restricted. If a child has limited interactions, Buildable will automatically attempt to propogate events upwards to its parent module.`,
+    text: `Snapping behavior can be restricted. Furthermore, Buildable will automatically attempt to propagate events upwards towards parent modules if the child module has limited interactions.`,
     callback: (rootElement) => {        
 
         const BUILDABLE = new Buildable(rootElement);
@@ -359,7 +369,7 @@ render({
         position: relative;
     }`,
     title: 'Content Injection',
-    text: `UI content can be injected directly on top of modules by accessing the associated HTMLCanvasElement via ._attachedHTML. Unfortunately, sizing boundaries may have to be recalculated manually.`,
+    text: `UI content can be injected directly on top of modules by accessing the associated HTMLCanvasElement via ._attachedHTML. Unfortunately, new sizing boundaries may have to be recalculated manually.`,
     callback: (rootElement) => {        
 
         function injectContent(module) {
@@ -428,6 +438,7 @@ render({
         moduleA.render();
         moduleB.render();
 
+        // Assign stylesheet
         moduleA._attachedHTML.className = "module";
         moduleB._attachedHTML.className = "module";
     },
