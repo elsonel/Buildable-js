@@ -3,23 +3,23 @@ const app = express();
 
 const path = require('path');
 
-//	Setting up a static directory for the files in /pub
+//	Setting up a static directory for the files in /public
 
-app.use(express.static(path.join(__dirname, '/pub')))
+app.use(express.static(path.join(__dirname, '/public')))
 
 
 // Routes
 
 app.get('/', function(req, res) {
-    res.sendFile('/pub/index.html', { root: __dirname });
+    res.sendFile('/public/index.html', { root: __dirname });
 });
 
 app.get('/gettingstarted', function(req, res) {
-    res.sendFile('/pub/gettingstarted/index.html', { root: __dirname });
+    res.sendFile('/public/gettingstarted/index.html', { root: __dirname });
 });
 
 app.get('/docs', function(req, res) {
-    res.sendFile('/pub/docs/index.html', { root: __dirname });
+    res.sendFile('/public/docs/index.html', { root: __dirname });
 });
 
 //	Other Routes
