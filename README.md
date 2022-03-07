@@ -1,5 +1,7 @@
 # Buildable.js Library
 
+A vanilla JavaScript library used to facilitate the creation of dynamic UI backboards for customizable workspaces.
+
 Demonstrations for this library can be found [here](https://infinite-brook-99829.herokuapp.com/)
 
 ## Setup
